@@ -271,7 +271,7 @@ def excluir_restaurante():
                 confirmacao = input(f'Tem certeza que deseja excluir o restaurante "{nome_restaurante}"? (s/n): ')
 
                 if confirmacao.lower() == 's':
-                    cursor.execute('DELETE FROM restaurantes WHERE nome = ?', (nome_restaurante))
+                    cursor.execute('DELETE FROM restaurantes WHERE nome = ?', (nome_restaurante,))
                     conn.commit()
                     print(f'O restaurante {nome_restaurante} foi excluído com sucesso!')
                 else:
