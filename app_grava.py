@@ -4,7 +4,7 @@ import os
 import sqlite3
 
 
-# -----------------------------------------------------------------------------------------------banco de dados
+# ========================================================================================================================================================================================================================================================banco de dados
 def inicializar_banco():
     """
     Função para inicializar o banco de dados SQLite
@@ -51,6 +51,7 @@ restaurantes = [
     {'nome': 'Cantina', 'categoria': 'Italiano', 'ativo': False}
 ]
 
+# =====================================================================================================================================================================================================================================================================================================================
 # -------------------------------------------------------------------------------------Funções de exibição e utilitárias
 
 # camelCase - nomes com mistura de maiúsculas e minúsculas
@@ -122,7 +123,7 @@ def escolher_opcao():
         opcao_invalida()
 
 
-
+# =========================================================================================================================================================================================================================================================================================================================
 # ---------------------------------------------------------------------------------------Funções principais do programa
 
 # 
@@ -143,11 +144,6 @@ def cadastrar_novo_restaurante():
 
     categoria = input(f'Digite o nome da categoria do restaurante {nome_do_restaurante}: ')
 
-    # dados_do_restaurante = {'nome': nome_do_restaurante, 'categoria': categoria, 'ativo': False}
-
-    # restaurantes.append(dados_do_restaurante)
-    # print(f'O restaurante {nome_do_restaurante} foi cadastrado com sucesso!')
-
     try:
         conn = sqlite3.connect('restaurantes.db')
         cursor = conn.cursor()
@@ -166,7 +162,7 @@ def cadastrar_novo_restaurante():
 
     voltar_ao_menu_principal()
 
-# ========================================================
+# ======================================================================================================================================================================================================================================================================================================================
 def listar_restaurantes():
     """
     Função para listar todos os restaurantes cadastrados
@@ -174,17 +170,33 @@ def listar_restaurantes():
 
     exibir_subtitulo('Listando os restaurantes\n')
 
-    print(f'{'nome_restaurante'.center(21)} | {'categoria'.center(20)} | Status')
-    for restaurante in restaurantes:
-        nome_restaurante = restaurante['nome']
-        categoria = restaurante['categoria']
-        ativo = 'ativado' if restaurante['ativo'] else 'desativado'
-        # ljust - left justify 20 characteres no máximo por linha
-        print(f'-{nome_restaurante.ljust(20)} | {categoria.ljust(20)} | {ativo}')
+    try:
+        conn = sqlite3.connect('restaurantes.db')
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT nome, categoria, ativo FROM restaurantes ORDER BY nome')
+        restaurantes = cursor.fetchall()
+
+        if restaurantes:
+            print(f'{'Nome do Restaurante'.ljust(21)} | {'Categoria'.ljust(20)} | Status')
+            print('-' * 65)
+
+            for restaurante in restaurantes:
+                nome = restaurante[0]
+                categoria = restaurante[1]
+                ativo = 'ativado' if restaurante[2] else 'desativado'
+                print(f'{nome.ljust(21)} | {categoria.ljust(20)} | {ativo}')
+        else: 
+            print('Nenhum restaurante cadastrado.')
+
+        conn.close()
+
+    except sqlite3.Error as e:
+        print(f'Erro ao listar restaurantes: {e}')
 
     voltar_ao_menu_principal()
 
-# =========================================================
+# ====================================================================================================================================================================================================================================================================================================================================================================================
 def alternar_estado_do_restaurante():
     """
     Função para ativar ou desativar um restaurante
@@ -192,18 +204,6 @@ def alternar_estado_do_restaurante():
 
     exibir_subtitulo('Alternando estado do restaurante\n')
     nome_restaurante = input('Digite o nome do restaurante que deseja alterar o estado: ')
-
-    # restaurante_encontrado = False
-
-    # for restaurante in restaurantes:
-    #     if nome_restaurante == restaurante['nome']:
-    #         restaurante_encontrado = True
-    #         restaurante['ativo'] = not restaurante['ativo'] # inverte o estado (ex. false para true)
-    #         mensagem = f'O restaurante {nome_restaurante} foi ativado com sucesso!' if restaurante['ativo'] else f'O restaurante {nome_restaurante} foi desativado com sucesso!'
-    #         print(mensagem)
-
-    # if not restaurante_encontrado:
-    #     print('O restaurante não foi encontrado!')
 
     try:
         conn = sqlite3.connect('restaurante.db')
@@ -236,7 +236,7 @@ def alternar_estado_do_restaurante():
     
     voltar_ao_menu_principal()
 
-# ======================================================
+# =======================================================================================================================================================================================================================================================================================================================
 def excluir_restaurante():
     """
     Função para excluir um restaurante
@@ -261,9 +261,33 @@ def excluir_restaurante():
             nome_restaurante = input('Digite o nome do restaurante que deseja excluir: ')
 
             # verificar se o restaurante existe
-            cursor.execute('SELECT')
+            cursor.execute('SELECT id FROM restaurantes WHERE nome = ?', (nome_restaurante,))
+            resultado = cursor.fetchone()
 
+            if resultado is not None:
+                confirmacao = input(f'Tem certeza que deseja excluir o restaurante "{nome_restaurante}"? (s/n): ')
 
+                if confirmacao.lower() == 's':
+                    cursor.execute('DELETE FROM restaurantes WHERE nome = ?', (nome_restaurante))
+                    conn.commit()
+                    print(f'O restaurante {nome_restaurante} foi excluído com sucesso!')
+                else:
+                    print('Exclusão cancelada.')
+            else:
+                print('O restaurante não foi encontrado!')
+        else: 
+            print('Nenhum restaurante cadastrado para excluir.')
+        
+        conn.close()
+
+    except sqlite3.Error as e:
+        print(f'Erro ao excluir restaurant: {e}')
+
+    voltar_ao_menu_principal()
+    
+
+# ===================================================================================================================================================================================================================================================================================================================================================================================
+# MAIN
 # função main sempre tem que estar como último item do script
 def main():
     """
