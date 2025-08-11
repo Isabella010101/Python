@@ -115,6 +115,9 @@ def escolher_opcao():
             alternar_estado_do_restaurante()
 
         elif opcao_escolhida == 4:
+            excluir_restaurante()
+
+        elif opcao_escolhida == 5:
             finalizar_app()
 
         else:
@@ -206,7 +209,7 @@ def alternar_estado_do_restaurante():
     nome_restaurante = input('Digite o nome do restaurante que deseja alterar o estado: ')
 
     try:
-        conn = sqlite3.connect('restaurante.db')
+        conn = sqlite3.connect('restaurantes.db')
         cursor = conn.cursor()
 
         # verificar se o restaurante existe e buscar seu estado atual
@@ -248,7 +251,7 @@ def excluir_restaurante():
         conn = sqlite3.connect('restaurantes.db')
         cursor = conn.cursor()
 
-        cursor.execute('SELECT nome, categoria FROM restaurantes ODER BY nome')
+        cursor.execute('SELECT nome, categoria FROM restaurantes ORDER BY nome')
         restaurantes = cursor.fetchall()
 
         if restaurantes:
@@ -262,7 +265,7 @@ def excluir_restaurante():
 
             # verificar se o restaurante existe
             cursor.execute('SELECT id FROM restaurantes WHERE nome = ?', (nome_restaurante,))
-            resultado = cursor.fetchone()
+            resultado = cursor.fetchone()   
 
             if resultado is not None:
                 confirmacao = input(f'Tem certeza que deseja excluir o restaurante "{nome_restaurante}"? (s/n): ')
@@ -293,6 +296,8 @@ def main():
     """
     Função para processar a escolha do usuário no menu principal
     """
+
+    inicializar_banco()
     os.system('cls') # limpa a tela
     exibir_nome_do_programa()
     exibir_opcoes()
