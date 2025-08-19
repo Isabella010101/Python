@@ -61,4 +61,84 @@ class TelaCadastro(ctk.CTk):
         # tenta carregar o ícone padrão
         try:
             icon_image = Image.open(resource_path("assets/inicio.png"))
-            icon_photo = Image
+            icon_photo = ImageTk.PhotoImage(icon_image)
+            self.iconphoto(False, icon_photo)
+        except Exception as e:
+            print(f"Não foi possível carregar o ícone padrão: {e}")
+
+        # frame principal
+        self.frame = ctk.CTkFrame(self)
+        self.frame.pack(pady=10, padx=10, fill="both", expand=True)
+
+        # frame superior para o  título e botão de modo
+        self.top_frame = ctk.CTkFrame(self.frame)
+        self.top_frame.pack(fill="x", padx=10, pady=5)
+
+        # título
+        self.label = ctk.CTkLabel(self.top_frame, text="Cadastro de Usuários", font=("Roboto", 24))
+        self.label.pack(side="left", pady=10)
+
+        # botão de troca de modo (claro/escuro)
+        self.switch_mode_btn = ctk.CTkButton(self.top_frame, text="", width=30, height=30, command=self.toggle_mode, image=self.dark_image)
+        self.switch_mode_btn.pack(side="right", padx=10)
+
+        # campo de entrada para o nome
+        self.nome_entry = ctk.ctkEntry(self.frame, placeholder_text="Nome")
+        self.nome_entry.pack(pady=10, padx=10, fill="x")
+
+        # frame para os botões
+        self.button_frame = ctk.CTkFrame(self.frame)
+        self.button_frame.pack(pady=5)
+
+        # botões de ação
+        self.cadastrar_btn = ctk.CTkButton(self.button_frame, text="Cadastrar", fg_color="green", hover_color="darkgreen", command=self.user_operations.cadastrar)
+        self.cadastrar_btn.pack(side="left", padx=5)
+
+        self.atualizar_btn = ctk.CTkButton(self.button_frame, text="Atualizar", fg_color="blue", hover_color="darkblue", command=self.user_operations.atualizar_usuario)
+        self.atualizar_btn.pack(side="left", padx=5)
+
+        # configuração do estilo da treeview
+        self.tree = ttk.Treeview(self.frame, columns=("ID", "Nome"), show = "headings")
+        self.tree.heading("ID", text="ID", anchor="center")
+        self.tree.heading("Nome", text="Nome", anchor="center")
+        self.tree.column("ID", width=50, anchor="center")
+        self.tree.column("ID", width=400, anchor="center")
+        self.tree.pack(pady=12, padx=10, fill="both", expand=True)
+
+        # vincula a seleção na treeview a um método
+        self.tree.bind("<<TreeviewSelect>>", self.on_user_select)
+
+        # carrega os dados iniciais
+        self.carregar_dados()
+
+        # carrega os dados iniciais
+        def carregar_dados(self):
+            for i in self.tree.get_children():
+                self.tree.delete(i)
+            for row in self.db.get_all_users():
+                self.tree.insert("", "end", values=row)
+
+        # manipula o evento de seleção de um usuário na treeview
+        def on_user_select(self, event):
+            selected_items = self.tree.selection()
+            if selected_items:
+                item = selected_items[0]
+                self.selected_user = self.tree.item(item, "values")
+                self.nome_entry.delete(0, "end")
+                self.nome_entry.insert(0, self.selected_user[1])
+
+        # alterna entre os modos claro e escuro
+        def toggle_mode(self):
+            if ctk.get_appearance_mode() == "Dark":
+                ctk.set_appearance_mode("Light")
+                self.switch_mode_btn.configure(image=self.dark_image)
+            else:
+                ctk.set_apearance_mode('Dark')
+                self.switch_mode_btn.configure(image=self.light_image)
+
+if __name__ == "__main__":
+    ctk.set_appearance_mode("System")
+    ctk.set_default_color_theme("blue")
+    app = TelaCadastro()
+    app.mainloop()
+
